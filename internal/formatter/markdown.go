@@ -222,13 +222,13 @@ func (f *MarkdownFormatter) FormatSearchResult(w io.Writer, result *jira.SearchR
 
 	b.WriteString(fmt.Sprintf("# Search Results (%d of %d)\n\n", len(result.Issues), result.Total))
 
-	headers := []string{"Created", "Updated", "Key", "Parent", "Type", "Status", "Assignee", "Summary"}
+	headers := []string{"Created", "Updated", "Key", "Parent", "Type", "Status", "Reporter", "Assignee", "Summary"}
 	var rows [][]string
 	for _, issue := range result.Issues {
 		ai := toAgentIssue(&issue)
 		rows = append(rows, []string{
 			formatShortDate(ai.Created), formatShortDate(ai.Updated),
-			ai.Key, parentOrEpic(ai), ai.Type, ai.Status, shortenName(ai.Assignee), ai.Summary,
+			ai.Key, parentOrEpic(ai), ai.Type, ai.Status, shortenName(ai.Reporter), shortenName(ai.Assignee), ai.Summary,
 		})
 	}
 	writeAlignedTable(&b, headers, rows)
