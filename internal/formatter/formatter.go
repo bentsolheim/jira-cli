@@ -14,14 +14,14 @@ type Formatter interface {
 }
 
 // New creates a formatter for the given format name.
-func New(format string) (Formatter, error) {
+func New(format string, baseURL string) (Formatter, error) {
 	switch format {
 	case "json":
-		return &JSONFormatter{}, nil
+		return &JSONFormatter{BaseURL: baseURL}, nil
 	case "markdown", "md":
-		return &MarkdownFormatter{}, nil
+		return &MarkdownFormatter{BaseURL: baseURL}, nil
 	case "text":
-		return &TextFormatter{}, nil
+		return &TextFormatter{BaseURL: baseURL}, nil
 	default:
 		return nil, fmt.Errorf("unknown output format: %q (use json, markdown, or text)", format)
 	}

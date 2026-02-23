@@ -9,13 +9,15 @@ import (
 )
 
 // MarkdownFormatter outputs issues as Markdown, suitable for LLM/agent context.
-type MarkdownFormatter struct{}
+type MarkdownFormatter struct {
+	BaseURL string
+}
 
 func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 	ai := toAgentIssue(issue)
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("# %s: %s\n\n", ai.Key, ai.Summary))
+	b.WriteString(fmt.Sprintf("# [%s](%s/browse/%s): %s\n\n", ai.Key, f.BaseURL, ai.Key, ai.Summary))
 
 	b.WriteString("| Field | Value |\n|---|---|\n")
 	b.WriteString(fmt.Sprintf("| Status | %s |\n", ai.Status))
@@ -51,10 +53,26 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 
 	if len(ai.Children) > 0 {
 		b.WriteString("\n## Children\n\n")
-		b.WriteString("| Key | Type | Status | Summary |\n")
-		b.WriteString("|-----|------|--------|---------|\n")
+		b.WriteString("| Key | Type | Status | Assignee | Summary |\n")
+		b.WriteString("|-----|------|--------|----------|---------|\n")
 		for _, c := range ai.Children {
-			b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", c.Key, c.Type, c.Status, c.Summary))
+			b.WriteString(fmt.Sprintf("| [%s](%s/browse/%s) | %s | %s | %s | %s |\n", c.Key, f.BaseURL, c.Key, c.Type, c.Status, c.Assignee, c.Summary))
+		}
+
+		b.WriteString("\n## Child Details\n")
+		for i, c := range ai.Children {
+			b.WriteString(fmt.Sprintf("\n### [%s](%s/browse/%s): %s\n\n", c.Key, f.BaseURL, c.Key, c.Summary))
+			b.WriteString(fmt.Sprintf("**Status:** %s | **Type:** %s", c.Status, c.Type))
+			if c.Assignee != "" {
+				b.WriteString(fmt.Sprintf(" | **Assignee:** %s", c.Assignee))
+			}
+			b.WriteString("\n")
+			if c.Description != "" {
+				b.WriteString(fmt.Sprintf("\n%s\n", c.Description))
+			}
+			if i < len(ai.Children)-1 {
+				b.WriteString("\n\n\n")
+			}
 		}
 	}
 

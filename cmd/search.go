@@ -37,8 +37,8 @@ Examples:
 			return fmt.Errorf("search failed: %w", err)
 		}
 
-		f, err := formatter.New(outputFormat)
-		if err != nil {
+		f, err := formatter.New(outputFormat, jiraURL)
+		if (err != nil) {
 			return err
 		}
 

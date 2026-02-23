@@ -8,7 +8,9 @@ import (
 )
 
 // JSONFormatter outputs issues as structured JSON.
-type JSONFormatter struct{}
+type JSONFormatter struct {
+	BaseURL string
+}
 
 // agentIssue is a flattened, agent-friendly representation of a Jira issue.
 type agentIssue struct {
@@ -33,10 +35,12 @@ type agentIssue struct {
 }
 
 type agentChildIssue struct {
-	Key     string `json:"key"`
-	Summary string `json:"summary"`
-	Status  string `json:"status"`
-	Type    string `json:"type,omitempty"`
+	Key         string `json:"key"`
+	Summary     string `json:"summary"`
+	Status      string `json:"status"`
+	Type        string `json:"type,omitempty"`
+	Assignee    string `json:"assignee,omitempty"`
+	Description string `json:"description,omitempty"`
 }
 
 type agentLink struct {
@@ -99,8 +103,9 @@ func toAgentIssue(issue *jira.Issue) agentIssue {
 
 	for _, sub := range issue.Fields.Subtasks {
 		child := agentChildIssue{
-			Key:     sub.Key,
-			Summary: sub.Fields.Summary,
+			Key:         sub.Key,
+			Summary:     sub.Fields.Summary,
+			Description: sub.Fields.Description,
 		}
 		if sub.Fields.Status != nil {
 			child.Status = sub.Fields.Status.Name
@@ -108,20 +113,27 @@ func toAgentIssue(issue *jira.Issue) agentIssue {
 		if sub.Fields.IssueType != nil {
 			child.Type = sub.Fields.IssueType.Name
 		}
+		if sub.Fields.Assignee != nil {
+			child.Assignee = sub.Fields.Assignee.DisplayName
+		}
 		ai.Children = append(ai.Children, child)
 	}
 
 	// Include issues belonging to this epic (fetched via separate API call)
 	for _, epicChild := range issue.EpicChildren {
 		child := agentChildIssue{
-			Key:     epicChild.Key,
-			Summary: epicChild.Fields.Summary,
+			Key:         epicChild.Key,
+			Summary:     epicChild.Fields.Summary,
+			Description: epicChild.Fields.Description,
 		}
 		if epicChild.Fields.Status != nil {
 			child.Status = epicChild.Fields.Status.Name
 		}
 		if epicChild.Fields.IssueType != nil {
 			child.Type = epicChild.Fields.IssueType.Name
+		}
+		if epicChild.Fields.Assignee != nil {
+			child.Assignee = epicChild.Fields.Assignee.DisplayName
 		}
 		ai.Children = append(ai.Children, child)
 	}
@@ -131,14 +143,18 @@ func toAgentIssue(issue *jira.Issue) agentIssue {
 		isEpicChild := link.Type.Name == "Epic" && link.InwardIssue != nil
 		if isEpicChild {
 			child := agentChildIssue{
-				Key:     link.InwardIssue.Key,
-				Summary: link.InwardIssue.Fields.Summary,
+				Key:         link.InwardIssue.Key,
+				Summary:     link.InwardIssue.Fields.Summary,
+				Description: link.InwardIssue.Fields.Description,
 			}
 			if link.InwardIssue.Fields.Status != nil {
 				child.Status = link.InwardIssue.Fields.Status.Name
 			}
 			if link.InwardIssue.Fields.IssueType != nil {
 				child.Type = link.InwardIssue.Fields.IssueType.Name
+			}
+			if link.InwardIssue.Fields.Assignee != nil {
+				child.Assignee = link.InwardIssue.Fields.Assignee.DisplayName
 			}
 			ai.Children = append(ai.Children, child)
 			continue

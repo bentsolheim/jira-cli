@@ -10,7 +10,9 @@ import (
 )
 
 // TextFormatter outputs issues as human-readable plain text tables.
-type TextFormatter struct{}
+type TextFormatter struct {
+	BaseURL string
+}
 
 func (f *TextFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 	ai := toAgentIssue(issue)

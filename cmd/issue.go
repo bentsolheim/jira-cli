@@ -34,7 +34,7 @@ Examples:
 			return fmt.Errorf("failed to get issue %s: %w", key, err)
 		}
 
-		f, err := formatter.New(outputFormat)
+		f, err := formatter.New(outputFormat, jiraURL)
 		if err != nil {
 			return err
 		}
