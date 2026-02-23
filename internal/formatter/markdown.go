@@ -55,9 +55,16 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 
 	if len(ai.Children) > 0 {
 		b.WriteString("\n## Children\n\n")
+
+		headers := []string{"Key", "Type", "Status", "Assignee", "Summary"}
+		var rows [][]string
 		for _, c := range ai.Children {
-			b.WriteString(fmt.Sprintf("- [%s](%s/browse/%s): %s\n", c.Key, f.BaseURL, c.Key, c.Summary))
+			rows = append(rows, []string{
+				fmt.Sprintf("[%s](%s/browse/%s)", c.Key, f.BaseURL, c.Key),
+				c.Type, c.Status, c.Assignee, c.Summary,
+			})
 		}
+		writeAlignedTable(&b, headers, rows)
 
 		b.WriteString("\n## Child Details\n")
 		for i, c := range ai.Children {
@@ -94,18 +101,63 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 	return err
 }
 
+// writeAlignedTable writes a markdown table with columns padded to equal width.
+func writeAlignedTable(b *strings.Builder, headers []string, rows [][]string) {
+	// Calculate max width for each column
+	widths := make([]int, len(headers))
+	for i, h := range headers {
+		widths[i] = len(h)
+	}
+	for _, row := range rows {
+		for i, cell := range row {
+			if i < len(widths) && len(cell) > widths[i] {
+				widths[i] = len(cell)
+			}
+		}
+	}
+
+	// Write header row
+	b.WriteString("|")
+	for i, h := range headers {
+		b.WriteString(fmt.Sprintf(" %-*s |", widths[i], h))
+	}
+	b.WriteString("\n")
+
+	// Write separator row
+	b.WriteString("|")
+	for _, w := range widths {
+		b.WriteString("-")
+		b.WriteString(strings.Repeat("-", w))
+		b.WriteString("-|")
+	}
+	b.WriteString("\n")
+
+	// Write data rows
+	for _, row := range rows {
+		b.WriteString("|")
+		for i := range headers {
+			cell := ""
+			if i < len(row) {
+				cell = row[i]
+			}
+			b.WriteString(fmt.Sprintf(" %-*s |", widths[i], cell))
+		}
+		b.WriteString("\n")
+	}
+}
+
 func (f *MarkdownFormatter) FormatSearchResult(w io.Writer, result *jira.SearchResult) error {
 	var b strings.Builder
 
 	b.WriteString(fmt.Sprintf("# Search Results (%d of %d)\n\n", len(result.Issues), result.Total))
-	b.WriteString("| Key | Type | Status | Priority | Assignee | Summary |\n")
-	b.WriteString("|-----|------|--------|----------|----------|---------|\n")
 
+	headers := []string{"Key", "Type", "Status", "Priority", "Assignee", "Summary"}
+	var rows [][]string
 	for _, issue := range result.Issues {
 		ai := toAgentIssue(&issue)
-		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s | %s | %s |\n",
-			ai.Key, ai.Type, ai.Status, ai.Priority, ai.Assignee, ai.Summary))
+		rows = append(rows, []string{ai.Key, ai.Type, ai.Status, ai.Priority, ai.Assignee, ai.Summary})
 	}
+	writeAlignedTable(&b, headers, rows)
 
 	_, err := io.WriteString(w, b.String())
 	return err
