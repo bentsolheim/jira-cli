@@ -9,6 +9,7 @@ import (
 	"github.com/bentsolheim/jira-cli/internal/jira"
 	"github.com/bentsolheim/jira-cli/internal/keychain"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var authCmd = &cobra.Command{
@@ -20,12 +21,26 @@ var authStoreCmd = &cobra.Command{
 	Use:   "store",
 	Short: "Store a Personal Access Token in the macOS Keychain",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Fprintf(os.Stderr, "Enter your Jira PAT for %s: ", jiraURL)
-		token, err := reader.ReadString('\n')
-		if err != nil {
-			return fmt.Errorf("reading token: %w", err)
+		var token string
+
+		if term.IsTerminal(int(os.Stdin.Fd())) {
+			fmt.Fprintf(os.Stderr, "Enter your Jira PAT for %s: ", jiraURL)
+			raw, err := term.ReadPassword(int(os.Stdin.Fd()))
+			if err != nil {
+				return fmt.Errorf("reading token: %w", err)
+			}
+			fmt.Fprintln(os.Stderr) // newline after hidden input
+			token = string(raw)
+		} else {
+			// Support piped input: echo "token" | jira auth store
+			reader := bufio.NewReader(os.Stdin)
+			raw, err := reader.ReadString('\n')
+			if err != nil {
+				return fmt.Errorf("reading token from stdin: %w", err)
+			}
+			token = raw
 		}
+
 		token = strings.TrimSpace(token)
 		if token == "" {
 			return fmt.Errorf("token cannot be empty")
