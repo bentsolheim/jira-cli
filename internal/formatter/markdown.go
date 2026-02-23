@@ -19,31 +19,30 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 
 	b.WriteString(fmt.Sprintf("# [%s](%s/browse/%s): %s\n\n", ai.Key, f.BaseURL, ai.Key, ai.Summary))
 
-	b.WriteString("| Field | Value |\n|---|---|\n")
-	b.WriteString(fmt.Sprintf("| Status | %s |\n", ai.Status))
-	b.WriteString(fmt.Sprintf("| Type | %s |\n", ai.Type))
-	b.WriteString(fmt.Sprintf("| Priority | %s |\n", ai.Priority))
-	b.WriteString(fmt.Sprintf("| Project | %s |\n", ai.Project))
+	b.WriteString(fmt.Sprintf("- **Status:** %s\n", ai.Status))
+	b.WriteString(fmt.Sprintf("- **Type:** %s\n", ai.Type))
+	b.WriteString(fmt.Sprintf("- **Priority:** %s\n", ai.Priority))
+	b.WriteString(fmt.Sprintf("- **Project:** %s\n", ai.Project))
 	if ai.Assignee != "" {
-		b.WriteString(fmt.Sprintf("| Assignee | %s |\n", ai.Assignee))
+		b.WriteString(fmt.Sprintf("- **Assignee:** %s\n", ai.Assignee))
 	}
 	if ai.Reporter != "" {
-		b.WriteString(fmt.Sprintf("| Reporter | %s |\n", ai.Reporter))
+		b.WriteString(fmt.Sprintf("- **Reporter:** %s\n", ai.Reporter))
 	}
 	if ai.Resolution != "" {
-		b.WriteString(fmt.Sprintf("| Resolution | %s |\n", ai.Resolution))
+		b.WriteString(fmt.Sprintf("- **Resolution:** %s\n", ai.Resolution))
 	}
 	if ai.Parent != "" {
-		b.WriteString(fmt.Sprintf("| Parent | %s |\n", ai.Parent))
+		b.WriteString(fmt.Sprintf("- **Parent:** %s\n", ai.Parent))
 	}
 	if len(ai.Labels) > 0 {
-		b.WriteString(fmt.Sprintf("| Labels | %s |\n", strings.Join(ai.Labels, ", ")))
+		b.WriteString(fmt.Sprintf("- **Labels:** %s\n", strings.Join(ai.Labels, ", ")))
 	}
 	if len(ai.Components) > 0 {
-		b.WriteString(fmt.Sprintf("| Components | %s |\n", strings.Join(ai.Components, ", ")))
+		b.WriteString(fmt.Sprintf("- **Components:** %s\n", strings.Join(ai.Components, ", ")))
 	}
-	b.WriteString(fmt.Sprintf("| Created | %s |\n", ai.Created))
-	b.WriteString(fmt.Sprintf("| Updated | %s |\n", ai.Updated))
+	b.WriteString(fmt.Sprintf("- **Created:** %s\n", ai.Created))
+	b.WriteString(fmt.Sprintf("- **Updated:** %s\n", ai.Updated))
 
 	if ai.Description != "" {
 		b.WriteString("\n## Description\n\n")
@@ -53,20 +52,18 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 
 	if len(ai.Children) > 0 {
 		b.WriteString("\n## Children\n\n")
-		b.WriteString("| Key | Type | Status | Assignee | Summary |\n")
-		b.WriteString("|-----|------|--------|----------|---------|\n")
 		for _, c := range ai.Children {
-			b.WriteString(fmt.Sprintf("| [%s](%s/browse/%s) | %s | %s | %s | %s |\n", c.Key, f.BaseURL, c.Key, c.Type, c.Status, c.Assignee, c.Summary))
+			b.WriteString(fmt.Sprintf("- [%s](%s/browse/%s): %s\n", c.Key, f.BaseURL, c.Key, c.Summary))
 		}
 
 		b.WriteString("\n## Child Details\n")
 		for i, c := range ai.Children {
 			b.WriteString(fmt.Sprintf("\n### [%s](%s/browse/%s): %s\n\n", c.Key, f.BaseURL, c.Key, c.Summary))
-			b.WriteString(fmt.Sprintf("**Status:** %s | **Type:** %s", c.Status, c.Type))
+			b.WriteString(fmt.Sprintf("- **Status:** %s\n", c.Status))
+			b.WriteString(fmt.Sprintf("- **Type:** %s\n", c.Type))
 			if c.Assignee != "" {
-				b.WriteString(fmt.Sprintf(" | **Assignee:** %s", c.Assignee))
+				b.WriteString(fmt.Sprintf("- **Assignee:** %s\n", c.Assignee))
 			}
-			b.WriteString("\n")
 			if c.Description != "" {
 				b.WriteString(fmt.Sprintf("\n%s\n", c.Description))
 			}
