@@ -111,6 +111,21 @@ func toAgentIssue(issue *jira.Issue) agentIssue {
 		ai.Children = append(ai.Children, child)
 	}
 
+	// Include issues belonging to this epic (fetched via separate API call)
+	for _, epicChild := range issue.EpicChildren {
+		child := agentChildIssue{
+			Key:     epicChild.Key,
+			Summary: epicChild.Fields.Summary,
+		}
+		if epicChild.Fields.Status != nil {
+			child.Status = epicChild.Fields.Status.Name
+		}
+		if epicChild.Fields.IssueType != nil {
+			child.Type = epicChild.Fields.IssueType.Name
+		}
+		ai.Children = append(ai.Children, child)
+	}
+
 	for _, link := range issue.Fields.IssueLinks {
 		// Treat "Epic" links (Issues in Epic) as children
 		isEpicChild := link.Type.Name == "Epic" && link.InwardIssue != nil

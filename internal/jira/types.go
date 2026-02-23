@@ -13,6 +13,10 @@ type Issue struct {
 	Key    string      `json:"key"`
 	Self   string      `json:"self"`
 	Fields IssueFields `json:"fields"`
+
+	// EpicChildren holds issues belonging to this epic.
+	// Not populated from JSON — filled by a separate API call.
+	EpicChildren []Issue `json:"-"`
 }
 
 // IssueFields contains the fields of a Jira issue.
