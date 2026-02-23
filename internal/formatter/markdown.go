@@ -49,10 +49,12 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 		b.WriteString("\n")
 	}
 
-	if len(ai.Subtasks) > 0 {
-		b.WriteString("\n## Subtasks\n\n")
-		for _, s := range ai.Subtasks {
-			b.WriteString(fmt.Sprintf("- %s\n", s))
+	if len(ai.Children) > 0 {
+		b.WriteString("\n## Children\n\n")
+		b.WriteString("| Key | Type | Status | Summary |\n")
+		b.WriteString("|-----|------|--------|---------|\n")
+		for _, c := range ai.Children {
+			b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", c.Key, c.Type, c.Status, c.Summary))
 		}
 	}
 

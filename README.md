@@ -6,8 +6,9 @@ A command-line tool for querying your internal Jira installation, optimized for 
 
 - **macOS Keychain integration** — PAT stored securely, no config files
 - **JQL search** — Full Jira Query Language support
-- **Issue details** — Fetch complete issue data including comments, links, subtasks
-- **Agent-friendly output** — JSON (default), Markdown, and plain text formats
+- **Issue details** — Fetch complete issue data including comments, links, children
+- **Agent-friendly output** — Markdown (default), JSON, and plain text formats
+- **Epic awareness** — "Issues in Epic" links are treated as children alongside subtasks
 - **Flattened structure** — Output is deliberately simplified for LLM context windows
 
 ## Installation
@@ -45,11 +46,11 @@ jira-cli auth test
 ### Search for issues
 
 ```bash
-# Default JSON output
+# Default markdown output
 jira-cli search "project = MYPROJ AND status = Open"
 
-# Markdown output (great for LLM context)
-jira-cli search "assignee = currentUser() ORDER BY updated DESC" -o markdown
+# JSON output (for programmatic use)
+jira-cli search "assignee = currentUser() ORDER BY updated DESC" -o json
 
 # Limit results
 jira-cli search "labels = backend" --max-results 10
@@ -58,11 +59,11 @@ jira-cli search "labels = backend" --max-results 10
 ### Get issue details
 
 ```bash
-# JSON (default)
+# Markdown (default)
 jira-cli issue PROJ-123
 
-# Markdown
-jira-cli issue PROJ-123 -o markdown
+# JSON
+jira-cli issue PROJ-123 -o json
 
 # Plain text
 jira-cli issue PROJ-123 -o text
@@ -78,8 +79,8 @@ jira-cli --url https://other-jira.example.com search "project = FOO"
 
 | Format | Flag | Best for |
 |--------|------|----------|
+| Markdown | `-o markdown` | Default. Human-readable, LLM context windows |
 | JSON | `-o json` | AI agents, piping to `jq`, programmatic use |
-| Markdown | `-o markdown` | LLM context windows, readable structured data |
 | Text | `-o text` | Human terminal use |
 
 ## Example JSON Output
@@ -97,7 +98,10 @@ jira-cli --url https://other-jira.example.com search "project = FOO"
   "created": "2026-01-15T10:30:00.000+0100",
   "updated": "2026-02-20T14:22:00.000+0100",
   "description": "As a user I want to...",
-  "subtasks": ["PROJ-124", "PROJ-125"],
+  "children": [
+    {"key": "PROJ-124", "summary": "Add login endpoint", "status": "Done", "type": "Sub-task"},
+    {"key": "PROJ-125", "summary": "Add OAuth support", "status": "Open", "type": "Story"}
+  ],
   "comments": [
     {
       "author": "John Smith",

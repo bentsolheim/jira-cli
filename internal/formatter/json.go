@@ -12,24 +12,31 @@ type JSONFormatter struct{}
 
 // agentIssue is a flattened, agent-friendly representation of a Jira issue.
 type agentIssue struct {
-	Key         string        `json:"key"`
-	Summary     string        `json:"summary"`
-	Status      string        `json:"status"`
-	Priority    string        `json:"priority,omitempty"`
-	Type        string        `json:"type"`
-	Assignee    string        `json:"assignee,omitempty"`
-	Reporter    string        `json:"reporter,omitempty"`
-	Project     string        `json:"project"`
-	Labels      []string      `json:"labels,omitempty"`
-	Components  []string      `json:"components,omitempty"`
-	Created     string        `json:"created"`
-	Updated     string        `json:"updated"`
-	Resolution  string        `json:"resolution,omitempty"`
-	Description string        `json:"description,omitempty"`
-	Parent      string        `json:"parent,omitempty"`
-	Subtasks    []string      `json:"subtasks,omitempty"`
-	Links       []agentLink   `json:"links,omitempty"`
-	Comments    []agentComment `json:"comments,omitempty"`
+	Key         string           `json:"key"`
+	Summary     string           `json:"summary"`
+	Status      string           `json:"status"`
+	Priority    string           `json:"priority,omitempty"`
+	Type        string           `json:"type"`
+	Assignee    string           `json:"assignee,omitempty"`
+	Reporter    string           `json:"reporter,omitempty"`
+	Project     string           `json:"project"`
+	Labels      []string         `json:"labels,omitempty"`
+	Components  []string         `json:"components,omitempty"`
+	Created     string           `json:"created"`
+	Updated     string           `json:"updated"`
+	Resolution  string           `json:"resolution,omitempty"`
+	Description string           `json:"description,omitempty"`
+	Parent      string           `json:"parent,omitempty"`
+	Children    []agentChildIssue `json:"children,omitempty"`
+	Links       []agentLink      `json:"links,omitempty"`
+	Comments    []agentComment   `json:"comments,omitempty"`
+}
+
+type agentChildIssue struct {
+	Key     string `json:"key"`
+	Summary string `json:"summary"`
+	Status  string `json:"status"`
+	Type    string `json:"type,omitempty"`
 }
 
 type agentLink struct {
@@ -91,10 +98,37 @@ func toAgentIssue(issue *jira.Issue) agentIssue {
 	}
 
 	for _, sub := range issue.Fields.Subtasks {
-		ai.Subtasks = append(ai.Subtasks, sub.Key)
+		child := agentChildIssue{
+			Key:     sub.Key,
+			Summary: sub.Fields.Summary,
+		}
+		if sub.Fields.Status != nil {
+			child.Status = sub.Fields.Status.Name
+		}
+		if sub.Fields.IssueType != nil {
+			child.Type = sub.Fields.IssueType.Name
+		}
+		ai.Children = append(ai.Children, child)
 	}
 
 	for _, link := range issue.Fields.IssueLinks {
+		// Treat "Epic" links (Issues in Epic) as children
+		isEpicChild := link.Type.Name == "Epic" && link.InwardIssue != nil
+		if isEpicChild {
+			child := agentChildIssue{
+				Key:     link.InwardIssue.Key,
+				Summary: link.InwardIssue.Fields.Summary,
+			}
+			if link.InwardIssue.Fields.Status != nil {
+				child.Status = link.InwardIssue.Fields.Status.Name
+			}
+			if link.InwardIssue.Fields.IssueType != nil {
+				child.Type = link.InwardIssue.Fields.IssueType.Name
+			}
+			ai.Children = append(ai.Children, child)
+			continue
+		}
+
 		al := agentLink{Type: link.Type.Name}
 		if link.OutwardIssue != nil {
 			al.IssueKey = link.OutwardIssue.Key

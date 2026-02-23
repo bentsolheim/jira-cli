@@ -52,11 +52,15 @@ func (f *TextFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 		b.WriteString(ai.Description + "\n")
 	}
 
-	if len(ai.Subtasks) > 0 {
-		b.WriteString("\nSubtasks:\n")
-		for _, s := range ai.Subtasks {
-			b.WriteString(fmt.Sprintf("  - %s\n", s))
+	if len(ai.Children) > 0 {
+		b.WriteString("\nChildren:\n")
+		tw2 := tabwriter.NewWriter(&b, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(tw2, "  KEY\tTYPE\tSTATUS\tSUMMARY")
+		fmt.Fprintln(tw2, "  ---\t----\t------\t-------")
+		for _, c := range ai.Children {
+			fmt.Fprintf(tw2, "  %s\t%s\t%s\t%s\n", c.Key, c.Type, c.Status, c.Summary)
 		}
+		tw2.Flush()
 	}
 
 	if len(ai.Links) > 0 {

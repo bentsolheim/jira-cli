@@ -30,6 +30,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "json", "Output format: json, markdown, text")
+	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "markdown", "Output format: markdown, json, text")
 	rootCmd.PersistentFlags().StringVar(&jiraURL, "url", "https://jira.sits.no", "Jira base URL")
 }
