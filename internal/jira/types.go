@@ -38,6 +38,7 @@ type IssueFields struct {
 	Subtasks    []Issue     `json:"subtasks"`
 	Parent      *Issue      `json:"parent"`
 	Resolution  *Resolution `json:"resolution"`
+	EpicLink    string      `json:"customfield_10761"`
 }
 
 // Status represents an issue status.

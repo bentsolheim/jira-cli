@@ -38,7 +38,7 @@ Examples:
 		}
 
 		f, err := formatter.New(outputFormat, jiraURL)
-		if (err != nil) {
+		if err != nil {
 			return err
 		}
 

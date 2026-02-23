@@ -35,6 +35,9 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 	if ai.Parent != "" {
 		b.WriteString(fmt.Sprintf("- **Parent:** %s\n", ai.Parent))
 	}
+	if ai.Epic != "" {
+		b.WriteString(fmt.Sprintf("- **Epic:** [%s](%s/browse/%s)\n", ai.Epic, f.BaseURL, ai.Epic))
+	}
 	if len(ai.Labels) > 0 {
 		b.WriteString(fmt.Sprintf("- **Labels:** %s\n", strings.Join(ai.Labels, ", ")))
 	}

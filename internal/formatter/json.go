@@ -14,24 +14,25 @@ type JSONFormatter struct {
 
 // agentIssue is a flattened, agent-friendly representation of a Jira issue.
 type agentIssue struct {
-	Key         string           `json:"key"`
-	Summary     string           `json:"summary"`
-	Status      string           `json:"status"`
-	Priority    string           `json:"priority,omitempty"`
-	Type        string           `json:"type"`
-	Assignee    string           `json:"assignee,omitempty"`
-	Reporter    string           `json:"reporter,omitempty"`
-	Project     string           `json:"project"`
-	Labels      []string         `json:"labels,omitempty"`
-	Components  []string         `json:"components,omitempty"`
-	Created     string           `json:"created"`
-	Updated     string           `json:"updated"`
-	Resolution  string           `json:"resolution,omitempty"`
-	Description string           `json:"description,omitempty"`
-	Parent      string           `json:"parent,omitempty"`
+	Key         string            `json:"key"`
+	Summary     string            `json:"summary"`
+	Status      string            `json:"status"`
+	Priority    string            `json:"priority,omitempty"`
+	Type        string            `json:"type"`
+	Assignee    string            `json:"assignee,omitempty"`
+	Reporter    string            `json:"reporter,omitempty"`
+	Project     string            `json:"project"`
+	Epic        string            `json:"epic,omitempty"`
+	Labels      []string          `json:"labels,omitempty"`
+	Components  []string          `json:"components,omitempty"`
+	Created     string            `json:"created"`
+	Updated     string            `json:"updated"`
+	Resolution  string            `json:"resolution,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Parent      string            `json:"parent,omitempty"`
 	Children    []agentChildIssue `json:"children,omitempty"`
-	Links       []agentLink      `json:"links,omitempty"`
-	Comments    []agentComment   `json:"comments,omitempty"`
+	Links       []agentLink       `json:"links,omitempty"`
+	Comments    []agentComment    `json:"comments,omitempty"`
 }
 
 type agentChildIssue struct {
@@ -93,6 +94,9 @@ func toAgentIssue(issue *jira.Issue) agentIssue {
 	}
 	if issue.Fields.Parent != nil {
 		ai.Parent = issue.Fields.Parent.Key
+	}
+	if issue.Fields.EpicLink != "" {
+		ai.Epic = issue.Fields.EpicLink
 	}
 
 	ai.Labels = issue.Fields.Labels
