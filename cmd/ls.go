@@ -17,6 +17,8 @@ var (
 	lsProject       string
 	lsIncludeClosed bool
 	lsMaxResults    int
+	lsSortCreated   bool
+	lsSortUpdated   bool
 )
 
 const defaultClosedStatuses = "Lukket,Utført"
@@ -41,7 +43,7 @@ func getClosedStatuses() []string {
 	return statuses
 }
 
-func buildLsJQL(project, text, status string, mine, includeClosed bool) string {
+func buildLsJQL(project, text, status, orderBy string, mine, includeClosed bool) string {
 	var conditions []string
 
 	conditions = append(conditions, fmt.Sprintf("project = %s", project))
@@ -67,7 +69,17 @@ func buildLsJQL(project, text, status string, mine, includeClosed bool) string {
 		conditions = append(conditions, fmt.Sprintf("(summary ~ %q OR description ~ %q)", text, text))
 	}
 
-	return strings.Join(conditions, " AND ") + " ORDER BY Rank ASC"
+	return strings.Join(conditions, " AND ") + " ORDER BY " + orderBy
+}
+
+func lsOrderBy() string {
+	if lsSortCreated {
+		return "created DESC"
+	}
+	if lsSortUpdated {
+		return "updated DESC"
+	}
+	return "Rank ASC"
 }
 
 var lsCmd = &cobra.Command{
@@ -104,7 +116,7 @@ Examples:
 			text = args[0]
 		}
 
-		jql := buildLsJQL(project, text, lsStatus, lsMine, lsIncludeClosed)
+		jql := buildLsJQL(project, text, lsStatus, lsOrderBy(), lsMine, lsIncludeClosed)
 
 		if verbose {
 			fmt.Fprintf(os.Stderr, "JQL: %s\n", jql)
@@ -136,5 +148,8 @@ func init() {
 	lsCmd.Flags().StringVar(&lsProject, "project", "", "Override default project (env: JIRA_PROJECT)")
 	lsCmd.Flags().BoolVar(&lsIncludeClosed, "include-closed", false, "Include closed/resolved issues")
 	lsCmd.Flags().IntVar(&lsMaxResults, "max-results", 50, "Maximum number of results to return")
+	lsCmd.Flags().BoolVar(&lsSortCreated, "sort-created", false, "Sort by created date (newest first)")
+	lsCmd.Flags().BoolVar(&lsSortUpdated, "sort-updated", false, "Sort by updated date (newest first)")
+	lsCmd.MarkFlagsMutuallyExclusive("sort-created", "sort-updated")
 	rootCmd.AddCommand(lsCmd)
 }
