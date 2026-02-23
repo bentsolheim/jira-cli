@@ -10,6 +10,7 @@ import (
 var (
 	outputFormat string
 	jiraURL      string
+	verbose      bool
 )
 
 var rootCmd = &cobra.Command{
@@ -32,4 +33,5 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "markdown", "Output format: markdown, json, text")
 	rootCmd.PersistentFlags().StringVar(&jiraURL, "url", "https://jira.sits.no", "Jira base URL")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show raw HTTP responses from Jira")
 }

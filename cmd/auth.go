@@ -63,7 +63,7 @@ var authTestCmd = &cobra.Command{
 			return err
 		}
 
-		client := jira.NewClient(jiraURL, token)
+		client := jira.NewClient(jiraURL, token, verbose)
 		user, err := client.Myself()
 		if err != nil {
 			return fmt.Errorf("authentication failed: %w", err)

@@ -31,7 +31,7 @@ Examples:
 			return err
 		}
 
-		client := jira.NewClient(jiraURL, token)
+		client := jira.NewClient(jiraURL, token, verbose)
 		result, err := client.Search(jql, maxResults)
 		if err != nil {
 			return fmt.Errorf("search failed: %w", err)

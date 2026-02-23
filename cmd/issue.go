@@ -28,7 +28,7 @@ Examples:
 			return err
 		}
 
-		client := jira.NewClient(jiraURL, token)
+		client := jira.NewClient(jiraURL, token, verbose)
 		issue, err := client.GetIssue(key)
 		if err != nil {
 			return fmt.Errorf("failed to get issue %s: %w", key, err)
