@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/bentsolheim/jira-cli/internal/jira"
 )
@@ -146,16 +147,48 @@ func writeAlignedTable(b *strings.Builder, headers []string, rows [][]string) {
 	}
 }
 
+// formatShortDate converts a Jira timestamp to "yyyy-MM-dd HH:mm" format.
+func formatShortDate(jiraDate string) string {
+	// Jira uses ISO 8601: "2026-02-23T12:39:11.408+0100"
+	formats := []string{
+		"2006-01-02T15:04:05.000-0700",
+		"2006-01-02T15:04:05.000+0000",
+		"2006-01-02T15:04:05.000Z",
+		time.RFC3339,
+	}
+	for _, f := range formats {
+		if t, err := time.Parse(f, jiraDate); err == nil {
+			return t.Format("2006-01-02 15:04")
+		}
+	}
+	// Fallback: truncate if long enough
+	if len(jiraDate) >= 16 {
+		return jiraDate[:10] + " " + jiraDate[11:16]
+	}
+	return jiraDate
+}
+
+// parentOrEpic returns the parent key or epic key for display in tables.
+func parentOrEpic(ai agentIssue) string {
+	if ai.Parent != "" {
+		return ai.Parent
+	}
+	return ai.Epic
+}
+
 func (f *MarkdownFormatter) FormatSearchResult(w io.Writer, result *jira.SearchResult) error {
 	var b strings.Builder
 
 	b.WriteString(fmt.Sprintf("# Search Results (%d of %d)\n\n", len(result.Issues), result.Total))
 
-	headers := []string{"Key", "Type", "Status", "Priority", "Assignee", "Summary"}
+	headers := []string{"Key", "Type", "Status", "Assignee", "Parent", "Created", "Updated", "Summary"}
 	var rows [][]string
 	for _, issue := range result.Issues {
 		ai := toAgentIssue(&issue)
-		rows = append(rows, []string{ai.Key, ai.Type, ai.Status, ai.Priority, ai.Assignee, ai.Summary})
+		rows = append(rows, []string{
+			ai.Key, ai.Type, ai.Status, ai.Assignee, parentOrEpic(ai),
+			formatShortDate(ai.Created), formatShortDate(ai.Updated), ai.Summary,
+		})
 	}
 	writeAlignedTable(&b, headers, rows)
 

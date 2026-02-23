@@ -87,13 +87,14 @@ func (f *TextFormatter) FormatSearchResult(w io.Writer, result *jira.SearchResul
 	fmt.Fprintf(w, "Results: %d of %d\n\n", len(result.Issues), result.Total)
 
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "KEY\tTYPE\tSTATUS\tPRIORITY\tASSIGNEE\tSUMMARY")
-	fmt.Fprintln(tw, "---\t----\t------\t--------\t--------\t-------")
+	fmt.Fprintln(tw, "KEY\tTYPE\tSTATUS\tASSIGNEE\tPARENT\tCREATED\tUPDATED\tSUMMARY")
+	fmt.Fprintln(tw, "---\t----\t------\t--------\t------\t-------\t-------\t-------")
 
 	for _, issue := range result.Issues {
 		ai := toAgentIssue(&issue)
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\n",
-			ai.Key, ai.Type, ai.Status, ai.Priority, ai.Assignee, ai.Summary)
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+			ai.Key, ai.Type, ai.Status, ai.Assignee, parentOrEpic(ai),
+			formatShortDate(ai.Created), formatShortDate(ai.Updated), ai.Summary)
 	}
 
 	return tw.Flush()

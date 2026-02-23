@@ -12,11 +12,11 @@ import (
 )
 
 var (
-	lsMine         bool
-	lsStatus       string
-	lsProject      string
+	lsMine          bool
+	lsStatus        string
+	lsProject       string
 	lsIncludeClosed bool
-	lsMaxResults   int
+	lsMaxResults    int
 )
 
 const defaultClosedStatuses = "Lukket,Utført"
