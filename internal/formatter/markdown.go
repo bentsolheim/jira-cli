@@ -147,7 +147,7 @@ func writeAlignedTable(b *strings.Builder, headers []string, rows [][]string) {
 	}
 }
 
-// formatShortDate converts a Jira timestamp to "yyyy-MM-dd HH:mm" format.
+// formatShortDate converts a Jira timestamp to "jan. 02 15:04" format.
 func formatShortDate(jiraDate string) string {
 	// Jira uses ISO 8601: "2026-02-23T12:39:11.408+0100"
 	formats := []string{
@@ -156,9 +156,13 @@ func formatShortDate(jiraDate string) string {
 		"2006-01-02T15:04:05.000Z",
 		time.RFC3339,
 	}
+	months := []string{
+		"jan.", "feb.", "mar.", "apr.", "mai", "jun.",
+		"jul.", "aug.", "sep.", "okt.", "nov.", "des.",
+	}
 	for _, f := range formats {
 		if t, err := time.Parse(f, jiraDate); err == nil {
-			return t.Format("2006-01-02 15:04")
+			return fmt.Sprintf("%s %02d %02d:%02d", months[t.Month()-1], t.Day(), t.Hour(), t.Minute())
 		}
 	}
 	// Fallback: truncate if long enough
@@ -166,6 +170,43 @@ func formatShortDate(jiraDate string) string {
 		return jiraDate[:10] + " " + jiraDate[11:16]
 	}
 	return jiraDate
+}
+
+// shortenName converts "Lastname, Firstname Middle" to "Firstname ML".
+// E.g. "Tørå Hagli, Andreas" -> "Andreas HT", "Christensen, Kristoffer Waage" -> "Kristoffer WC".
+func shortenName(name string) string {
+	if name == "" {
+		return ""
+	}
+	parts := strings.SplitN(name, ", ", 2)
+	if len(parts) != 2 {
+		// Not in "Last, First" format — return as-is
+		return name
+	}
+	lastParts := strings.Fields(parts[0])
+	firstParts := strings.Fields(parts[1])
+	if len(firstParts) == 0 {
+		return name
+	}
+	firstName := firstParts[0]
+	// Build initials from remaining first-name parts + last-name parts (reversed)
+	var initials []rune
+	for _, p := range firstParts[1:] {
+		for _, r := range p {
+			initials = append(initials, []rune(strings.ToUpper(string(r)))[0])
+			break
+		}
+	}
+	for _, p := range lastParts {
+		for _, r := range p {
+			initials = append(initials, []rune(strings.ToUpper(string(r)))[0])
+			break
+		}
+	}
+	if len(initials) > 0 {
+		return firstName + " " + string(initials)
+	}
+	return firstName
 }
 
 // parentOrEpic returns the parent key or epic key for display in tables.
@@ -181,13 +222,13 @@ func (f *MarkdownFormatter) FormatSearchResult(w io.Writer, result *jira.SearchR
 
 	b.WriteString(fmt.Sprintf("# Search Results (%d of %d)\n\n", len(result.Issues), result.Total))
 
-	headers := []string{"Key", "Type", "Status", "Assignee", "Parent", "Created", "Updated", "Summary"}
+	headers := []string{"Created", "Updated", "Key", "Parent", "Type", "Status", "Assignee", "Summary"}
 	var rows [][]string
 	for _, issue := range result.Issues {
 		ai := toAgentIssue(&issue)
 		rows = append(rows, []string{
-			ai.Key, ai.Type, ai.Status, ai.Assignee, parentOrEpic(ai),
-			formatShortDate(ai.Created), formatShortDate(ai.Updated), ai.Summary,
+			formatShortDate(ai.Created), formatShortDate(ai.Updated),
+			ai.Key, parentOrEpic(ai), ai.Type, ai.Status, shortenName(ai.Assignee), ai.Summary,
 		})
 	}
 	writeAlignedTable(&b, headers, rows)
