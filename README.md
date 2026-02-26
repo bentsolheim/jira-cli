@@ -6,10 +6,11 @@ A command-line tool for querying your internal Jira installation, optimized for 
 
 - **macOS Keychain integration** — PAT stored securely, no config files
 - **JQL search** — Full Jira Query Language support
-- **Issue details** — Fetch complete issue data including comments, links, children
+- **Issue management** — Create, update, and fetch issue details
 - **Agent-friendly output** — Markdown (default), JSON, and plain text formats
 - **Epic awareness** — "Issues in Epic" links are treated as children alongside subtasks
 - **Flattened structure** — Output is deliberately simplified for LLM context windows
+- **YAML input** — Create and update issues via structured YAML (ideal for automation)
 
 ## Installation
 
@@ -42,6 +43,62 @@ jira-cli auth test
 ```
 
 ## Usage
+
+### List issues
+
+```bash
+# List open issues in your default project (set JIRA_PROJECT env var)
+jira-cli ls
+
+# List your assigned issues
+jira-cli ls --mine
+
+# Search within summaries/descriptions
+jira-cli ls authentication
+
+# Filter by status or project
+jira-cli ls --status "In Progress" --project MUP
+
+# Include closed issues
+jira-cli ls --include-closed
+```
+
+### Create issues
+
+Create issues by providing YAML input via stdin:
+
+```bash
+echo 'project: MUP
+summary: Fix authentication bug
+description: Users cannot log in with SSO
+type: Bug
+labels:
+  - security
+  - urgent
+epicLink: MUP-123' | jira-cli create --output json
+```
+
+**Supported fields:**
+- `project` (required) — Project key (e.g., "MUP")
+- `summary` (required) — Issue summary
+- `type` (required) — Issue type name (e.g., "Task", "Bug", "Story", "Forbedring")
+- `description` — Issue description (optional)
+- `labels` — Array of label strings (optional)
+- `epicLink` — Epic issue key to link to (optional)
+
+### Update issues
+
+Update existing issues with YAML input and the `--issue-key` flag:
+
+```bash
+echo 'summary: Updated summary
+description: New description
+labels:
+  - updated
+  - backend' | jira-cli update --issue-key MUP-123 --output json
+```
+
+All fields are optional for updates. Only provided fields will be modified.
 
 ### Search for issues
 

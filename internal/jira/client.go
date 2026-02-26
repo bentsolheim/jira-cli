@@ -1,6 +1,7 @@
 package jira
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -33,15 +34,32 @@ func NewClient(baseURL, token string, verbose bool) *Client {
 
 // do executes an authenticated HTTP request and decodes the JSON response.
 func (c *Client) do(method, path string, result interface{}) error {
+	return c.doWithBody(method, path, nil, result)
+}
+
+// doWithBody executes an authenticated HTTP request with a JSON body and decodes the JSON response.
+func (c *Client) doWithBody(method, path string, body interface{}, result interface{}) error {
 	reqURL := c.baseURL + path
 
-	req, err := http.NewRequest(method, reqURL, nil)
+	var reqBody io.Reader
+	if body != nil {
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return fmt.Errorf("encoding request body: %w", err)
+		}
+		reqBody = bytes.NewReader(jsonData)
+	}
+
+	req, err := http.NewRequest(method, reqURL, reqBody)
 	if err != nil {
 		return fmt.Errorf("creating request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+c.token)
 	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
 
 	if c.verbose {
 		fmt.Fprintf(os.Stderr, ">>> %s %s\n", method, reqURL)
@@ -60,21 +78,21 @@ func (c *Client) do(method, path string, result interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("reading response body: %w", err)
 	}
 
 	if c.verbose {
-		fmt.Fprintf(os.Stderr, "<<< HTTP %d\n%s\n", resp.StatusCode, string(body))
+		fmt.Fprintf(os.Stderr, "<<< HTTP %d\n%s\n", resp.StatusCode, string(respBody))
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("API error (HTTP %d): %s", resp.StatusCode, string(body))
+		return fmt.Errorf("API error (HTTP %d): %s", resp.StatusCode, string(respBody))
 	}
 
 	if result != nil {
-		if err := json.Unmarshal(body, result); err != nil {
+		if err := json.Unmarshal(respBody, result); err != nil {
 			return fmt.Errorf("decoding response: %w", err)
 		}
 	}

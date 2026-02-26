@@ -49,3 +49,27 @@ func (c *Client) Search(jql string, maxResults int) (*SearchResult, error) {
 	}
 	return &result, nil
 }
+
+// CreateIssue creates a new Jira issue and returns the created issue.
+func (c *Client) CreateIssue(req *IssueCreateRequest) (*Issue, error) {
+	var response struct {
+		Key string `json:"key"`
+	}
+	
+	if err := c.doWithBody("POST", "/rest/api/2/issue", req, &response); err != nil {
+		return nil, err
+	}
+	
+	return c.GetIssue(response.Key)
+}
+
+// UpdateIssue updates an existing Jira issue and returns the updated issue.
+func (c *Client) UpdateIssue(key string, req *IssueUpdateRequest) (*Issue, error) {
+	path := fmt.Sprintf("/rest/api/2/issue/%s", url.PathEscape(key))
+	
+	if err := c.doWithBody("PUT", path, req, nil); err != nil {
+		return nil, err
+	}
+	
+	return c.GetIssue(key)
+}

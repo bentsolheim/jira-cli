@@ -108,3 +108,52 @@ type SearchResult struct {
 	Total      int     `json:"total"`
 	Issues     []Issue `json:"issues"`
 }
+
+// IssueInput is the user-friendly YAML input format.
+type IssueInput struct {
+	Project     string   `yaml:"project"`
+	Summary     string   `yaml:"summary"`
+	Description string   `yaml:"description"`
+	Type        string   `yaml:"type"`
+	Labels      []string `yaml:"labels"`
+	EpicLink    string   `yaml:"epicLink"`
+}
+
+// IssueCreateRequest represents the payload for creating a Jira issue.
+type IssueCreateRequest struct {
+	Fields IssueCreateFields `json:"fields"`
+}
+
+// IssueCreateFields contains fields for creating an issue.
+type IssueCreateFields struct {
+	Project     *ProjectRef `json:"project"`
+	Summary     string      `json:"summary"`
+	Description string      `json:"description,omitempty"`
+	IssueType   *TypeRef    `json:"issuetype"`
+	Labels      []string    `json:"labels,omitempty"`
+	EpicLink    string      `json:"customfield_10761,omitempty"`
+}
+
+// IssueUpdateRequest represents the payload for updating a Jira issue.
+type IssueUpdateRequest struct {
+	Fields IssueUpdateFields `json:"fields"`
+}
+
+// IssueUpdateFields contains fields for updating an issue.
+type IssueUpdateFields struct {
+	Summary     *string   `json:"summary,omitempty"`
+	Description *string   `json:"description,omitempty"`
+	IssueType   *TypeRef  `json:"issuetype,omitempty"`
+	Labels      *[]string `json:"labels,omitempty"`
+	EpicLink    *string   `json:"customfield_10761,omitempty"`
+}
+
+// ProjectRef is a reference to a project by key.
+type ProjectRef struct {
+	Key string `json:"key"`
+}
+
+// TypeRef is a reference to an issue type by name.
+type TypeRef struct {
+	Name string `json:"name"`
+}
