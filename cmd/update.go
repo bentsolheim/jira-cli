@@ -27,7 +27,8 @@ Supported fields (all optional):
   labels:      List of labels
   epicLink:    Epic issue key to link to
   epicName:    Epic short name
-  parent:      Parent issue key
+  parent:      Parent issue key (for subtasks)
+  parentLink:  Parent Link for Epic → Del-leveranse hierarchy
 
 Example YAML:
   summary: Updated summary
@@ -78,6 +79,9 @@ Usage:
 		}
 		if input.Parent != "" {
 			req.Fields.Parent = &jira.IssueRef{Key: input.Parent}
+		}
+		if input.ParentLink != "" {
+			req.Fields.ParentLink = &input.ParentLink
 		}
 
 		token, err := keychain.GetPAT(jiraURL)

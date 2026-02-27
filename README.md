@@ -86,7 +86,8 @@ epicLink: MUP-123' | jira-cli create --output json
 - `labels` — Array of label strings (optional)
 - `epicLink` — Epic issue key to link stories/tasks to (optional)
 - `epicName` — Epic short name, required when creating Epos/Epic (optional)
-- `parent` — Parent issue key for hierarchy linking (optional)
+- `parent` — Parent issue key for subtasks only (optional)
+- `parentLink` — Parent Link for Epic → Del-leveranse hierarchy (optional)
 
 ### Update issues
 

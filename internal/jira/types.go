@@ -111,14 +111,15 @@ type SearchResult struct {
 
 // IssueInput is the user-friendly YAML input format.
 type IssueInput struct {
-	Project     string   `yaml:"project"`
-	Summary     string   `yaml:"summary"`
+	Project    string   `yaml:"project"`
+	Summary    string   `yaml:"summary"`
 	Description string   `yaml:"description"`
-	Type        string   `yaml:"type"`
-	Labels      []string `yaml:"labels"`
-	EpicLink    string   `yaml:"epicLink"`
-	EpicName    string   `yaml:"epicName"`
-	Parent      string   `yaml:"parent"`
+	Type       string   `yaml:"type"`
+	Labels     []string `yaml:"labels"`
+	EpicLink   string   `yaml:"epicLink"`
+	EpicName   string   `yaml:"epicName"`
+	Parent     string   `yaml:"parent"`
+	ParentLink string   `yaml:"parentLink"`
 }
 
 // IssueCreateRequest represents the payload for creating a Jira issue.
@@ -128,14 +129,15 @@ type IssueCreateRequest struct {
 
 // IssueCreateFields contains fields for creating an issue.
 type IssueCreateFields struct {
-	Project     *ProjectRef `json:"project"`
-	Summary     string      `json:"summary"`
+	Project    *ProjectRef `json:"project"`
+	Summary    string      `json:"summary"`
 	Description string      `json:"description,omitempty"`
-	IssueType   *TypeRef    `json:"issuetype"`
-	Labels      []string    `json:"labels,omitempty"`
-	EpicLink    string      `json:"customfield_10761,omitempty"`
-	EpicName    string      `json:"customfield_10764,omitempty"`
-	Parent      *IssueRef   `json:"parent,omitempty"`
+	IssueType  *TypeRef    `json:"issuetype"`
+	Labels     []string    `json:"labels,omitempty"`
+	EpicLink   string      `json:"customfield_10761,omitempty"`
+	EpicName   string      `json:"customfield_10764,omitempty"`
+	Parent     *IssueRef   `json:"parent,omitempty"`
+	ParentLink string      `json:"customfield_13677,omitempty"`
 }
 
 // IssueUpdateRequest represents the payload for updating a Jira issue.
@@ -145,13 +147,14 @@ type IssueUpdateRequest struct {
 
 // IssueUpdateFields contains fields for updating an issue.
 type IssueUpdateFields struct {
-	Summary     *string    `json:"summary,omitempty"`
+	Summary    *string    `json:"summary,omitempty"`
 	Description *string    `json:"description,omitempty"`
-	IssueType   *TypeRef   `json:"issuetype,omitempty"`
-	Labels      *[]string  `json:"labels,omitempty"`
-	EpicLink    *string    `json:"customfield_10761,omitempty"`
-	EpicName    *string    `json:"customfield_10764,omitempty"`
-	Parent      *IssueRef  `json:"parent,omitempty"`
+	IssueType  *TypeRef   `json:"issuetype,omitempty"`
+	Labels     *[]string  `json:"labels,omitempty"`
+	EpicLink   *string    `json:"customfield_10761,omitempty"`
+	EpicName   *string    `json:"customfield_10764,omitempty"`
+	Parent     *IssueRef  `json:"parent,omitempty"`
+	ParentLink *string    `json:"customfield_13677,omitempty"`
 }
 
 // ProjectRef is a reference to a project by key.

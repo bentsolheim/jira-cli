@@ -31,8 +31,9 @@ This tool is **designed for AI agents first, humans second**. Interface design p
 - Labels are replaced on update, not merged
 - Issue types vary by instance (use `ls` to discover)
 - `epicName` required when creating Epos/Epic issues (customfield_10764)
-- `parent` used for hierarchy linking (e.g., Epos → Del-leveranse)
 - `epicLink` links stories/tasks to epics (customfield_10761)
+- `parent` for subtasks only (built-in Jira field)
+- `parentLink` for Epic → Del-leveranse hierarchy (customfield_13677)
 
 ## Basic Examples
 

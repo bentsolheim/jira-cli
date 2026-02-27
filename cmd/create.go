@@ -25,7 +25,8 @@ Supported fields:
   labels:      List of labels
   epicLink:    Epic issue key to link to (for stories/tasks)
   epicName:    Epic short name (required when type is Epos/Epic)
-  parent:      Parent issue key (for hierarchy linking)
+  parent:      Parent issue key (for subtasks only)
+  parentLink:  Parent Link for Epic → Del-leveranse hierarchy
 
 Example YAML:
   project: MUP
@@ -64,13 +65,14 @@ Usage:
 
 		req := &jira.IssueCreateRequest{
 			Fields: jira.IssueCreateFields{
-				Project:     &jira.ProjectRef{Key: input.Project},
-				Summary:     input.Summary,
+				Project:    &jira.ProjectRef{Key: input.Project},
+				Summary:    input.Summary,
 				Description: input.Description,
-				IssueType:   &jira.TypeRef{Name: input.Type},
-				Labels:      input.Labels,
-				EpicLink:    input.EpicLink,
-				EpicName:    input.EpicName,
+				IssueType:  &jira.TypeRef{Name: input.Type},
+				Labels:     input.Labels,
+				EpicLink:   input.EpicLink,
+				EpicName:   input.EpicName,
+				ParentLink: input.ParentLink,
 			},
 		}
 
