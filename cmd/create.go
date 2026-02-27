@@ -21,9 +21,11 @@ Supported fields:
   project:     Project key (e.g., "MUP")
   summary:     Issue summary (required)
   description: Issue description
-  type:        Issue type name (e.g., "Task", "Bug", "Story")
+  type:        Issue type name (e.g., "Task", "Bug", "Story", "Epos")
   labels:      List of labels
-  epicLink:    Epic issue key to link to
+  epicLink:    Epic issue key to link to (for stories/tasks)
+  epicName:    Epic short name (required when type is Epos/Epic)
+  parent:      Parent issue key (for hierarchy linking)
 
 Example YAML:
   project: MUP
@@ -68,7 +70,12 @@ Usage:
 				IssueType:   &jira.TypeRef{Name: input.Type},
 				Labels:      input.Labels,
 				EpicLink:    input.EpicLink,
+				EpicName:    input.EpicName,
 			},
+		}
+
+		if input.Parent != "" {
+			req.Fields.Parent = &jira.IssueRef{Key: input.Parent}
 		}
 
 		token, err := keychain.GetPAT(jiraURL)

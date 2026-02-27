@@ -81,10 +81,12 @@ epicLink: MUP-123' | jira-cli create --output json
 **Supported fields:**
 - `project` (required) — Project key (e.g., "MUP")
 - `summary` (required) — Issue summary
-- `type` (required) — Issue type name (e.g., "Task", "Bug", "Story", "Forbedring")
+- `type` (required) — Issue type name (e.g., "Task", "Bug", "Story", "Forbedring", "Epos")
 - `description` — Issue description (optional)
 - `labels` — Array of label strings (optional)
-- `epicLink` — Epic issue key to link to (optional)
+- `epicLink` — Epic issue key to link stories/tasks to (optional)
+- `epicName` — Epic short name, required when creating Epos/Epic (optional)
+- `parent` — Parent issue key for hierarchy linking (optional)
 
 ### Update issues
 

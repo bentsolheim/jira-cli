@@ -26,6 +26,8 @@ Supported fields (all optional):
   type:        Issue type name
   labels:      List of labels
   epicLink:    Epic issue key to link to
+  epicName:    Epic short name
+  parent:      Parent issue key
 
 Example YAML:
   summary: Updated summary
@@ -70,6 +72,12 @@ Usage:
 		}
 		if input.EpicLink != "" {
 			req.Fields.EpicLink = &input.EpicLink
+		}
+		if input.EpicName != "" {
+			req.Fields.EpicName = &input.EpicName
+		}
+		if input.Parent != "" {
+			req.Fields.Parent = &jira.IssueRef{Key: input.Parent}
 		}
 
 		token, err := keychain.GetPAT(jiraURL)
