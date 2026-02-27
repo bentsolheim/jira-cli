@@ -38,6 +38,9 @@ func (f *TextFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 	if ai.Parent != "" {
 		fmt.Fprintf(tw, "Parent:\t%s\n", ai.Parent)
 	}
+	if ai.ParentLink != "" {
+		fmt.Fprintf(tw, "Parent Link:\t%s\n", ai.ParentLink)
+	}
 	if len(ai.Labels) > 0 {
 		fmt.Fprintf(tw, "Labels:\t%s\n", strings.Join(ai.Labels, ", "))
 	}

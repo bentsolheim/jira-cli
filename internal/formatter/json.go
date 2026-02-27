@@ -30,6 +30,7 @@ type agentIssue struct {
 	Resolution  string            `json:"resolution,omitempty"`
 	Description string            `json:"description,omitempty"`
 	Parent      string            `json:"parent,omitempty"`
+	ParentLink  string            `json:"parentLink,omitempty"`
 	Children    []agentChildIssue `json:"children,omitempty"`
 	Links       []agentLink       `json:"links,omitempty"`
 	Comments    []agentComment    `json:"comments,omitempty"`
@@ -97,6 +98,9 @@ func toAgentIssue(issue *jira.Issue) agentIssue {
 	}
 	if issue.Fields.EpicLink != "" {
 		ai.Epic = issue.Fields.EpicLink
+	}
+	if issue.Fields.ParentLink != "" {
+		ai.ParentLink = issue.Fields.ParentLink
 	}
 
 	ai.Labels = issue.Fields.Labels

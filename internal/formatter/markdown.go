@@ -36,6 +36,9 @@ func (f *MarkdownFormatter) FormatIssue(w io.Writer, issue *jira.Issue) error {
 	if ai.Parent != "" {
 		b.WriteString(fmt.Sprintf("- **Parent:** %s\n", ai.Parent))
 	}
+	if ai.ParentLink != "" {
+		b.WriteString(fmt.Sprintf("- **Parent Link:** [%s](%s/browse/%s)\n", ai.ParentLink, f.BaseURL, ai.ParentLink))
+	}
 	if ai.Epic != "" {
 		b.WriteString(fmt.Sprintf("- **Epic:** [%s](%s/browse/%s)\n", ai.Epic, f.BaseURL, ai.Epic))
 	}

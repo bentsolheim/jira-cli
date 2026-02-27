@@ -39,6 +39,7 @@ type IssueFields struct {
 	Parent      *Issue      `json:"parent"`
 	Resolution  *Resolution `json:"resolution"`
 	EpicLink    string      `json:"customfield_10761"`
+	ParentLink  string      `json:"customfield_13677"`
 }
 
 // Status represents an issue status.
