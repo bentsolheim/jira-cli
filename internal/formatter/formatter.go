@@ -11,6 +11,22 @@ import (
 type Formatter interface {
 	FormatIssue(w io.Writer, issue *jira.Issue) error
 	FormatSearchResult(w io.Writer, result *jira.SearchResult) error
+	FormatComment(w io.Writer, result *CommentResult) error
+}
+
+// CommentResult describes a comment that was added (or would be added, on dry run).
+type CommentResult struct {
+	IssueKey string
+	Comment  *jira.Comment
+	DryRun   bool
+}
+
+// CommentURL returns a link that focuses the given comment on the issue page.
+func CommentURL(baseURL, issueKey, commentID string) string {
+	if commentID == "" {
+		return fmt.Sprintf("%s/browse/%s", baseURL, issueKey)
+	}
+	return fmt.Sprintf("%s/browse/%s?focusedCommentId=%s#comment-%s", baseURL, issueKey, commentID, commentID)
 }
 
 // New creates a formatter for the given format name.

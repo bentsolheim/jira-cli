@@ -6,7 +6,7 @@ A command-line tool for querying your internal Jira installation, optimized for 
 
 - **macOS Keychain integration** — PAT stored securely, no config files
 - **JQL search** — Full Jira Query Language support
-- **Issue management** — Create, update, and fetch issue details
+- **Issue management** — Create, update, comment on, and fetch issue details
 - **Agent-friendly output** — Markdown (default), JSON, and plain text formats
 - **Epic awareness** — "Issues in Epic" links are treated as children alongside subtasks
 - **Flattened structure** — Output is deliberately simplified for LLM context windows
@@ -102,6 +102,27 @@ labels:
 ```
 
 All fields are optional for updates. Only provided fields will be modified.
+
+### Comment on issues
+
+Add a comment to an issue. The body is sent as-is, so write it in Jira wiki markup (`h3.`, `*bold*`, `* bullet`, `{code}…{code}`, `[text|url]`).
+
+```bash
+# From a file (recommended for multiline text)
+jira-cli comment MUP-123 --file comment.txt --output json
+
+# From stdin (piped, or explicitly with --file -)
+cat comment.txt | jira-cli comment MUP-123
+jira-cli comment MUP-123 --file - < comment.txt
+
+# Inline text
+jira-cli comment MUP-123 --body "Deployed to test."
+
+# Preview without contacting Jira
+jira-cli comment MUP-123 --file comment.txt --dry-run
+```
+
+The body comes from exactly one of `--file`/`-f`, `--body`/`-b`, or stdin (stdin is used only when neither flag is given). Trailing whitespace is trimmed, and an empty body is rejected. The output includes the comment `id`, `author`, `created`, `body` and a `url` that links directly to the comment.
 
 ### Search for issues
 

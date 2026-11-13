@@ -214,3 +214,36 @@ func (f *JSONFormatter) FormatSearchResult(w io.Writer, result *jira.SearchResul
 	enc.SetIndent("", "  ")
 	return enc.Encode(ar)
 }
+
+type agentCommentResult struct {
+	IssueKey string `json:"issueKey"`
+	ID       string `json:"id,omitempty"`
+	Author   string `json:"author,omitempty"`
+	Created  string `json:"created,omitempty"`
+	URL      string `json:"url"`
+	DryRun   bool   `json:"dryRun,omitempty"`
+	Body     string `json:"body"`
+}
+
+func toAgentCommentResult(baseURL string, r *CommentResult) agentCommentResult {
+	ar := agentCommentResult{
+		IssueKey: r.IssueKey,
+		DryRun:   r.DryRun,
+	}
+	if r.Comment != nil {
+		ar.ID = r.Comment.ID
+		ar.Created = r.Comment.Created
+		ar.Body = r.Comment.Body
+		if r.Comment.Author != nil {
+			ar.Author = r.Comment.Author.DisplayName
+		}
+	}
+	ar.URL = CommentURL(baseURL, r.IssueKey, ar.ID)
+	return ar
+}
+
+func (f *JSONFormatter) FormatComment(w io.Writer, result *CommentResult) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	return enc.Encode(toAgentCommentResult(f.BaseURL, result))
+}

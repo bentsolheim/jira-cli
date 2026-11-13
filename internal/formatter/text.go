@@ -102,3 +102,24 @@ func (f *TextFormatter) FormatSearchResult(w io.Writer, result *jira.SearchResul
 
 	return tw.Flush()
 }
+
+func (f *TextFormatter) FormatComment(w io.Writer, result *CommentResult) error {
+	ac := toAgentCommentResult(f.BaseURL, result)
+	var b strings.Builder
+
+	if ac.DryRun {
+		b.WriteString(fmt.Sprintf("DRY RUN: comment NOT added to %s\n", ac.IssueKey))
+	} else {
+		b.WriteString(fmt.Sprintf("Comment %s added to %s\n", ac.ID, ac.IssueKey))
+		if ac.Author != "" {
+			b.WriteString(fmt.Sprintf("Author:  %s\n", ac.Author))
+		}
+		b.WriteString(fmt.Sprintf("Created: %s\n", ac.Created))
+	}
+	b.WriteString(fmt.Sprintf("URL:     %s\n\n", ac.URL))
+	b.WriteString(ac.Body)
+	b.WriteString("\n")
+
+	_, err := io.WriteString(w, b.String())
+	return err
+}

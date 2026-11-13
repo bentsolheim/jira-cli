@@ -4,7 +4,7 @@ This tool is **designed for AI agents first, humans second**. Interface design p
 
 ## Critical Rules for Agents
 
-1. **NO DATA MODIFICATION WITHOUT PERMISSION** — Never use `create` or `update` commands during testing or autonomous operation without explicit user approval. This is strictly forbidden.
+1. **NO DATA MODIFICATION WITHOUT PERMISSION** — Never use `create`, `update` or `comment` commands (except `comment --dry-run`) during testing or autonomous operation without explicit user approval. This is strictly forbidden.
 
 2. **Always use `--output json`** — Required for reliable parsing and programmatic use.
 
@@ -22,6 +22,7 @@ This tool is **designed for AI agents first, humans second**. Interface design p
 ### Write Operations (require user approval)
 - `create` — Create issue from YAML stdin
 - `update --issue-key KEY` — Update issue from YAML stdin
+- `comment KEY` — Add comment (Jira wiki markup) from `--file PATH`, `--body TEXT` or stdin. `--dry-run` previews without contacting Jira (safe)
 
 ## Key Points
 
@@ -34,6 +35,7 @@ This tool is **designed for AI agents first, humans second**. Interface design p
 - `epicLink` links stories/tasks to epics (customfield_10761)
 - `parent` for subtasks only (built-in Jira field)
 - `parentLink` for Epic → Del-leveranse hierarchy (customfield_13677)
+- Comments are Jira wiki markup, not Markdown. Prefer `--file` for multiline text (heredocs are unreliable in some terminals)
 
 ## Basic Examples
 
@@ -51,4 +53,10 @@ type: Task' | jira-cli create --output json
 
 # Update (REQUIRES USER APPROVAL)
 echo 'summary: New title' | jira-cli update --issue-key MUP-123 --output json
+
+# Preview a comment (safe, no Jira call)
+jira-cli comment MUP-123 --file comment.txt --dry-run --output json
+
+# Add comment (REQUIRES USER APPROVAL of issue key and text)
+jira-cli comment MUP-123 --file comment.txt --output json
 ```

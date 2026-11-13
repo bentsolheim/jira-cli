@@ -53,7 +53,7 @@ Examples:
 			}
 
 			if i > 0 {
-				fmt.Fprintln(os.Stdout, "\n---\n")
+				fmt.Fprint(os.Stdout, "\n---\n\n")
 			}
 
 			if err := f.FormatIssue(os.Stdout, issue); err != nil {

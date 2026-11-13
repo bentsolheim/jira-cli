@@ -239,3 +239,25 @@ func (f *MarkdownFormatter) FormatSearchResult(w io.Writer, result *jira.SearchR
 	_, err := io.WriteString(w, b.String())
 	return err
 }
+
+func (f *MarkdownFormatter) FormatComment(w io.Writer, result *CommentResult) error {
+	ac := toAgentCommentResult(f.BaseURL, result)
+	var b strings.Builder
+
+	if ac.DryRun {
+		b.WriteString(fmt.Sprintf("# Dry run: comment NOT added to [%s](%s)\n\n", ac.IssueKey, ac.URL))
+	} else {
+		b.WriteString(fmt.Sprintf("# Comment added to [%s](%s)\n\n", ac.IssueKey, ac.URL))
+		b.WriteString(fmt.Sprintf("- **ID:** %s\n", ac.ID))
+		if ac.Author != "" {
+			b.WriteString(fmt.Sprintf("- **Author:** %s\n", ac.Author))
+		}
+		b.WriteString(fmt.Sprintf("- **Created:** %s\n\n", ac.Created))
+	}
+	b.WriteString("## Body\n\n")
+	b.WriteString(ac.Body)
+	b.WriteString("\n")
+
+	_, err := io.WriteString(w, b.String())
+	return err
+}

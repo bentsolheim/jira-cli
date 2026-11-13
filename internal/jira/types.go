@@ -77,10 +77,16 @@ type Comments struct {
 
 // Comment represents an issue comment.
 type Comment struct {
+	ID      string `json:"id"`
 	Author  *User  `json:"author"`
 	Body    string `json:"body"`
 	Created string `json:"created"`
 	Updated string `json:"updated"`
+}
+
+// CommentRequest is the request body for adding a comment.
+type CommentRequest struct {
+	Body string `json:"body"`
 }
 
 // IssueLink represents a link between issues.
